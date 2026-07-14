@@ -7,7 +7,6 @@ import Home from './pages/Home';
 import PostDetails from './pages/PostDetails';
 import CreateEditPost from './pages/CreateEditPost';
 import Auth from './pages/Auth';
-import './App.css';
 
 function App() {
   return (
