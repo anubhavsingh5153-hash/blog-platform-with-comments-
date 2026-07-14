@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import CommentSection from '../components/CommentSection';
+import { API_URL } from '../config';
 
 const PostDetails = () => {
   const { id } = useParams();
@@ -35,7 +36,7 @@ const PostDetails = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await fetch(`/api/posts/${id}`);
+        const response = await fetch(`${API_URL}/posts/${id}`);
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('Post not found.');
@@ -62,7 +63,7 @@ const PostDetails = () => {
 
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`/api/posts/${id}`, {
+      const response = await fetch(`${API_URL}/posts/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

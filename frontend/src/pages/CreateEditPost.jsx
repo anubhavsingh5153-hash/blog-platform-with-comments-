@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { API_URL } from '../config';
 
 const CreateEditPost = () => {
   const { id } = useParams(); // Exists if we are in EDIT mode
@@ -33,7 +34,7 @@ const CreateEditPost = () => {
 
     const fetchPost = async () => {
       try {
-        const response = await fetch(`/api/posts/${id}`);
+        const response = await fetch(`${API_URL}/posts/${id}`);
         if (!response.ok) {
           throw new Error('Failed to retrieve post details.');
         }
@@ -73,7 +74,7 @@ const CreateEditPost = () => {
     setError('');
 
     const token = localStorage.getItem('token');
-    const url = isEditMode ? `/api/posts/${id}` : '/api/posts';
+    const url = isEditMode ? `${API_URL}/posts/${id}` : `${API_URL}/posts`;
     const method = isEditMode ? 'PUT' : 'POST';
 
     try {

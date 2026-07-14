@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 
 const CommentSection = ({ postId, postAuthorId }) => {
   const { user } = useAuth();
@@ -13,7 +14,7 @@ const CommentSection = ({ postId, postAuthorId }) => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await fetch(`/api/comments/${postId}`);
+        const response = await fetch(`${API_URL}/comments/${postId}`);
         if (response.ok) {
           const data = await response.json();
           setComments(data);
@@ -37,7 +38,7 @@ const CommentSection = ({ postId, postAuthorId }) => {
 
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`/api/comments/${postId}`, {
+      const response = await fetch(`${API_URL}/comments/${postId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +69,7 @@ const CommentSection = ({ postId, postAuthorId }) => {
 
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`/api/comments/${commentId}`, {
+      const response = await fetch(`${API_URL}/comments/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

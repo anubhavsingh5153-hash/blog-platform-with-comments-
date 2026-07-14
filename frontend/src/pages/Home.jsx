@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PostCard from '../components/PostCard';
+import { API_URL } from '../config';
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -11,7 +12,7 @@ const Home = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch('/api/posts');
+        const response = await fetch(`${API_URL}/posts`);
         if (!response.ok) {
           throw new Error('Failed to retrieve posts.');
         }
