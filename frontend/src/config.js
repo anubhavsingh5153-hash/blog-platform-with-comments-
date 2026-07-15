@@ -17,11 +17,11 @@ const getApiUrl = () => {
   }
   
   const hostname = window.location.hostname;
-  if (hostname.includes('github.io')) {
-    return 'https://blog-platform-with-comments-9nxf.onrender.com/api';
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === 'blog-platform-with-comments-9nxf.onrender.com') {
+    return '/api';
   }
   
-  return '/api';
+  return 'https://blog-platform-with-comments-9nxf.onrender.com/api';
 };
 
 export const API_URL = getApiUrl();
