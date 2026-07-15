@@ -28,13 +28,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
           
-      - name: Install dependencies
+      - name: Install Frontend dependencies
         run: npm ci
+        working-directory: frontend
         
       - name: Build Frontend
         run: npm run build
+        working-directory: frontend
         env:
           VITE_BASE_PATH: /blog-platform-with-comments-/
           
