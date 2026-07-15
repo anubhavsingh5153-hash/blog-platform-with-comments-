@@ -52,6 +52,57 @@ db.serialize(() => {
       FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE CASCADE
     )
   `);
+
+  // Seeding initial data if database is empty
+  db.get('SELECT COUNT(*) AS count FROM users', (err, row) => {
+    if (err) {
+      console.error('Error checking users for seeding:', err.message);
+      return;
+    }
+    
+    if (row && row.count === 0) {
+      console.log('Database is empty. Seeding initial test data...');
+      
+      db.serialize(() => {
+        // Seed Users
+        db.run(`INSERT INTO users (id, username, email, password, created_at) VALUES 
+          (1, 'testwriter', 'writer@test.com', '$2a$10$eBEklxFZ0p2f1yTIvLAzvuR8.OsS09gXTAZ7RYSPdcILtZFBdp7D2', '2026-07-14 07:49:33'),
+          (2, 'testuser2', 'user2@test.com', '$2a$10$6SNSKTB4HgKHm19o5ZYGvu76cQBlAncIOYrZwk16IyWqqJ5aP5sz.', '2026-07-14 08:48:55')
+        `, (err) => {
+          if (err) {
+            console.error('Failed to seed users:', err.message);
+            return;
+          }
+          console.log('Seeded users successfully.');
+          
+          // Seed Posts
+          db.run(`INSERT INTO posts (id, title, content, author_id, created_at, updated_at) VALUES 
+            (1, 'Mastering Premium CSS Glassmorphism (Updated)', 'Glassmorphism combines transparency, background blur, and fine borders to build layouts that float elegantly over colorful gradient backdrops.\n\nThis application uses a custom design system built with CSS variables to ensure high performance and fluid theme transitions.', 1, '2026-07-14 07:50:24', '2026-07-14 07:51:42'),
+            (2, 'Design Foundations of Glassmorphic UI', '### Defining Glassmorphism\nGlassmorphism relies on the visual interplay of blurred layers, light diffusion, and structural depth.\n\n> \"Good design makes a product useful.\" - Dieter Rams\n\n### Core Properties\n- Backdrop filter blur: provides separation from the colorful gradients beneath.\n- Transparent border stroke: helps isolate card contours.\n- Ambient drifting glows: makes the overall page feel organic and responsive.', 1, '2026-07-14 08:00:10', '2026-07-14 08:00:10'),
+            (3, 'My First Post', 'This is the body of my first post. It has some interesting content.', 2, '2026-07-14 08:50:24', '2026-07-14 08:50:24')
+          `, (err) => {
+            if (err) {
+              console.error('Failed to seed posts:', err.message);
+              return;
+            }
+            console.log('Seeded posts successfully.');
+            
+            // Seed Comments
+            db.run(`INSERT INTO comments (id, content, post_id, author_id, created_at) VALUES 
+              (1, 'Wow, this interface looks incredibly professional and responsive!', 1, 1, '2026-07-14 07:50:59'),
+              (2, 'This is a great post! I really enjoyed reading it.', 3, 2, '2026-07-14 08:53:28')
+            `, (err) => {
+              if (err) {
+                console.error('Failed to seed comments:', err.message);
+                return;
+              }
+              console.log('Seeded comments successfully.');
+            });
+          });
+        });
+      });
+    }
+  });
 });
 
 // Promise wrappers for database operations
