@@ -12,7 +12,7 @@ function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Router>
+        <Router basename={import.meta.env.BASE_URL}>
           <div className="app-container">
             {/* Ambient Background Glow Elements */}
             <div className="ambient-glow-wrapper">

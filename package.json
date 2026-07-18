@@ -4,6 +4,7 @@
   "description": "Premium Blog Platform with Comments (Full Stack Connection)",
   "scripts": {
     "postinstall": "node postinstall.js",
+    "start": "node backend/server.js",
     "backend": "npm start --prefix backend",
     "frontend": "npm run dev --prefix frontend",
     "dev": "npx concurrently \"npm run backend\" \"npm run frontend\"",

@@ -17,7 +17,14 @@ const getApiUrl = () => {
   }
   
   const hostname = window.location.hostname;
-  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === 'blog-platform-with-comments-9nxf.onrender.com') {
+  if (
+    hostname === 'localhost' || 
+    hostname === '127.0.0.1' || 
+    hostname.endsWith('.onrender.com') ||
+    hostname.endsWith('.vercel.app') ||
+    hostname.includes('localhost') ||
+    hostname.includes('127.0.0.1')
+  ) {
     return '/api';
   }
   

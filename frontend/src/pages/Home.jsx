@@ -5,27 +5,39 @@ import { API_URL } from '../config';
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('latest'); // latest, oldest, popular
+  const [retrying, setRetrying] = useState(false);
+
+  const fetchPosts = async (isRetry = false) => {
+    if (isRetry) {
+      setRetrying(true);
+    } else {
+      setLoading(true);
+    }
+    setError(null);
+    try {
+      const response = await fetch(`${API_URL}/posts`);
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
+      const data = await response.json();
+      setPosts(data);
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setError({
+        message: 'Unable to retrieve blog articles.',
+        details: err.message,
+        url: `${API_URL}/posts`
+      });
+    } finally {
+      setLoading(false);
+      setRetrying(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch(`${API_URL}/posts`);
-        if (!response.ok) {
-          throw new Error('Failed to retrieve posts.');
-        }
-        const data = await response.json();
-        setPosts(data);
-      } catch (err) {
-        console.error('Error fetching posts:', err);
-        setError('Unable to load articles. Please check back later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPosts();
   }, []);
 
@@ -102,7 +114,54 @@ const Home = () => {
           <p>Curating the latest articles...</p>
         </div>
       ) : error ? (
-        <div className="alert-banner alert-error home-error-banner">{error}</div>
+        <div className="glass-card error-diagnostic-card">
+          <div className="error-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="error-svg">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+          <h3>Connection Error</h3>
+          <p className="error-message-text">{error.message}</p>
+          
+          <div className="error-explanation">
+            <p><strong>Possible Reasons:</strong></p>
+            <ul>
+              <li><strong>Cold Start:</strong> Render free-tier databases and backends spin down after 15 minutes of inactivity. It can take up to 60 seconds to wake back up.</li>
+              <li><strong>API URL Configuration:</strong> The frontend might be pointing to a different or outdated Render deployment.</li>
+              <li><strong>Local Offline:</strong> If testing locally, check that your backend server is actually running.</li>
+            </ul>
+          </div>
+
+          <div className="diagnostic-info-box">
+            <details>
+              <summary>Show Technical Diagnostic Details</summary>
+              <div className="diagnostic-content">
+                <p><strong>Request URL:</strong> <code>{error.url}</code></p>
+                <p><strong>Error Details:</strong> <code>{error.details}</code></p>
+                <p><strong>Hostname:</strong> <code>{window.location.hostname}</code></p>
+                <p className="diagnostic-tip">Tip: If this URL is incorrect, set the <code>VITE_API_URL</code> environment variable in your Vercel project settings to your backend Render URL (e.g. <code>https://your-app.onrender.com/api</code>).</p>
+              </div>
+            </details>
+          </div>
+
+          <button 
+            className="btn btn-primary retry-btn" 
+            onClick={() => fetchPosts(true)}
+            disabled={retrying}
+            style={{ marginTop: '10px' }}
+          >
+            {retrying ? (
+              <>
+                <div className="spinner-mini"></div>
+                Waking up server...
+              </>
+            ) : (
+              'Retry Connection'
+            )}
+          </button>
+        </div>
       ) : filteredPosts.length === 0 ? (
         <div className="glass-card empty-feed-card">
           <h3>No articles found</h3>
@@ -322,6 +381,159 @@ const Home = () => {
           .filter-options {
             justify-content: space-between;
           }
+        }
+
+        /* Error Diagnostic Card styling */
+        .error-diagnostic-card {
+          padding: 40px;
+          text-align: center;
+          max-width: 600px;
+          margin: 40px auto;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          box-shadow: 0 12px 40px rgba(239, 68, 68, 0.08);
+          background: rgba(14, 20, 34, 0.45);
+        }
+
+        .error-icon-wrapper {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
+          background: rgba(239, 68, 68, 0.1);
+          color: #ef4444;
+          margin-bottom: 8px;
+        }
+
+        .error-svg {
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+
+        .error-diagnostic-card h3 {
+          font-size: 1.6rem;
+          color: #f8fafc;
+          margin: 0;
+        }
+
+        .error-message-text {
+          color: var(--text-secondary);
+          font-size: 1.05rem;
+          margin: 0;
+        }
+
+        .error-explanation {
+          text-align: left;
+          width: 100%;
+          background: rgba(255, 255, 255, 0.01);
+          border: 1px solid var(--border-glass);
+          padding: 20px;
+          border-radius: var(--border-radius-md);
+          font-size: 0.9rem;
+          line-height: 1.6;
+        }
+
+        .error-explanation p {
+          margin-top: 0;
+          margin-bottom: 10px;
+          color: var(--text-primary);
+        }
+
+        .error-explanation ul {
+          margin: 0;
+          padding-left: 20px;
+          color: var(--text-secondary);
+        }
+
+        .error-explanation li {
+          margin-bottom: 8px;
+        }
+
+        .error-explanation li:last-child {
+          margin-bottom: 0;
+        }
+
+        .diagnostic-info-box {
+          width: 100%;
+          text-align: left;
+          background: rgba(0, 0, 0, 0.2);
+          border: 1px solid var(--border-glass);
+          border-radius: var(--border-radius-md);
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+          box-sizing: border-box;
+        }
+
+        .diagnostic-info-box details {
+          padding: 12px 16px;
+        }
+
+        .diagnostic-info-box summary {
+          cursor: pointer;
+          font-weight: 600;
+          user-select: none;
+          color: var(--text-primary);
+          outline: none;
+        }
+
+        .diagnostic-content {
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid var(--border-glass);
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .diagnostic-content p {
+          margin: 0;
+        }
+
+        .diagnostic-content code {
+          background: rgba(255, 255, 255, 0.06);
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-family: monospace;
+          color: var(--accent-secondary);
+          word-break: break-all;
+        }
+
+        .diagnostic-tip {
+          font-style: italic;
+          color: var(--text-muted);
+          margin-top: 4px !important;
+          line-height: 1.4;
+        }
+
+        .retry-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 24px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          border-radius: var(--border-radius-md);
+          cursor: pointer;
+          transition: var(--transition-smooth);
+        }
+
+        .spinner-mini {
+          width: 16px;
+          height: 16px;
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          border-top-color: white;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
         }
       `}</style>
     </div>
