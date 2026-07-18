@@ -12,8 +12,16 @@ const getApiUrl = () => {
     return storedApiUrl;
   }
 
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  let apiUrl = import.meta.env.VITE_API_URL;
+  if (apiUrl) {
+    apiUrl = apiUrl.trim();
+    if (apiUrl.endsWith('/')) {
+      apiUrl = apiUrl.slice(0, -1);
+    }
+    if (!apiUrl.endsWith('/api')) {
+      apiUrl = `${apiUrl}/api`;
+    }
+    return apiUrl;
   }
   
   const hostname = window.location.hostname;
